@@ -9,6 +9,21 @@ main = Blueprint('main', __name__)
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'password'
 
+@app.route('/create', methods=['GET', 'POST'])
+def create():
+    if not session.get('admin'):
+        return redirect(url_for('main.login'))
+
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        new_post = Post(title=title, content=content)
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for('main.admin'))
+    return render_template('create_post.html')
+
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if not session.get('admin'):
