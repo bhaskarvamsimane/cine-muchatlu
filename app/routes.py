@@ -1,6 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import (
+    Blueprint, render_template, redirect, url_for, flash, 
+    request, session, current_app
+)
 from werkzeug.utils import secure_filename
 import os
+import time
+
 from app.forms import PostForm, LoginForm
 from app.models import Post
 from app import db
@@ -11,57 +16,11 @@ main = Blueprint('main', __name__)
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'password'
 
-@main.route('/create', methods=['GET', 'POST'])
-def create():
-    if not session.get('admin'):
-        return redirect(url_for('main.login'))
-
-    if request.method == 'POST':
-        title = request.form['title']
-        content = request.form['content']
-        new_post = Post(title=title, content=content)
-
-        # Image upload handling
-        if 'image' in request.files:
-            image_file = request.files['image']
-            if image_file and image_file.filename != '':
-                filename = secure_filename(image_file.filename)
-                upload_path = os.path.join(os.getcwd(), 'app', 'static', 'uploads')  # Adjust as needed
-                os.makedirs(upload_path, exist_ok=True)
-                image_file.save(os.path.join(upload_path, filename))
-                new_post.image = filename
-
-        db.session.add(new_post)
-        db.session.commit()
-        return redirect(url_for('main.admin'))
-
-    return render_template('create_post.html')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
-@main.route('/admin', methods=['GET', 'POST'])
-def admin():
-    if not session.get('admin'):
-        return redirect(url_for('main.login'))
-
-    posts = Post.query.order_by(Post.date_posted.desc()).all()
-    return render_template('admin_dashboard.html', posts=posts)
-
-
-@main.route('/signup')
-def signup():
-    return render_template('signup.html')
-
-
-@main.route('/')
-def home():
-    posts = Post.query.order_by(Post.date_posted.desc()).all()
-    return render_template('home.html', posts=posts)
-
-
-@main.route('/post/<int:post_id>')
-def post(post_id):
-    post = Post.query.get_or_404(post_id)
-    return render_template('post.html', post=post)
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -70,10 +29,18 @@ def login():
     if form.validate_on_submit():
         if form.username.data == ADMIN_USERNAME and form.password.data == ADMIN_PASSWORD:
             session['admin'] = True
+            flash('Logged in successfully!', 'success')
             return redirect(url_for('main.dashboard'))
         else:
-            flash('Invalid login')
+            flash('Invalid username or password', 'danger')
     return render_template('login.html', form=form)
+
+
+@main.route('/logout')
+def logout():
+    session.pop('admin', None)
+    flash('Logged out successfully.', 'info')
+    return redirect(url_for('main.login'))
 
 
 @main.route('/admin/dashboard')
@@ -82,7 +49,7 @@ def dashboard():
         return redirect(url_for('main.login'))
 
     posts = Post.query.order_by(Post.date_posted.desc()).all()
-    return render_template('admin/dashboard.html', posts=posts)
+    return render_template('admin_dashboard.html', posts=posts)
 
 
 @main.route('/admin/create', methods=['GET', 'POST'])
@@ -93,11 +60,27 @@ def create_post():
     form = PostForm()
     if form.validate_on_submit():
         post = Post(title=form.title.data, content=form.content.data)
+
+        # Image upload handling
+        image_file = request.files.get('image')
+        if image_file and image_file.filename != '':
+            if allowed_file(image_file.filename):
+                filename = secure_filename(image_file.filename)
+                unique_filename = f"{int(time.time())}_{filename}"
+                upload_path = os.path.join(current_app.root_path, 'static', 'uploads')
+                os.makedirs(upload_path, exist_ok=True)
+                image_file.save(os.path.join(upload_path, unique_filename))
+                post.image = unique_filename
+            else:
+                flash('Invalid image format. Allowed: png, jpg, jpeg, gif', 'danger')
+                return redirect(request.url)
+
         db.session.add(post)
         db.session.commit()
-        flash('Post created!')
+        flash('Post created successfully!', 'success')
         return redirect(url_for('main.dashboard'))
-    return render_template('admin/create_post.html', form=form)
+
+    return render_template('create_post.html', form=form)
 
 
 @main.route('/admin/edit/<int:post_id>', methods=['GET', 'POST'])
@@ -107,16 +90,32 @@ def edit_post(post_id):
 
     post = Post.query.get_or_404(post_id)
     form = PostForm(obj=post)
+
     if form.validate_on_submit():
         post.title = form.title.data
         post.content = form.content.data
+
+        image_file = request.files.get('image')
+        if image_file and image_file.filename != '':
+            if allowed_file(image_file.filename):
+                filename = secure_filename(image_file.filename)
+                unique_filename = f"{int(time.time())}_{filename}"
+                upload_path = os.path.join(current_app.root_path, 'static', 'uploads')
+                os.makedirs(upload_path, exist_ok=True)
+                image_file.save(os.path.join(upload_path, unique_filename))
+                post.image = unique_filename
+            else:
+                flash('Invalid image format. Allowed: png, jpg, jpeg, gif', 'danger')
+                return redirect(request.url)
+
         db.session.commit()
-        flash('Post updated!')
+        flash('Post updated successfully!', 'success')
         return redirect(url_for('main.dashboard'))
-    return render_template('admin/edit_post.html', form=form)
+
+    return render_template('edit_post.html', form=form, post=post)
 
 
-@main.route('/admin/delete/<int:post_id>')
+@main.route('/admin/delete/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
     if not session.get('admin'):
         return redirect(url_for('main.login'))
@@ -124,10 +123,22 @@ def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     db.session.delete(post)
     db.session.commit()
-    flash('Post deleted!')
+    flash('Post deleted!', 'success')
     return redirect(url_for('main.dashboard'))
+
+
+@main.route('/')
+def home():
+    posts = Post.query.order_by(Post.date_posted.desc()).all()
+    return render_template('home.html', posts=posts)
+
+
+@main.route('/post/<int:post_id>')
+def post_detail(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html', post=post)
+
 
 @main.route('/routes')
 def show_routes():
-    return '<br>'.join([f"{rule.endpoint} -> {rule.rule}" for rule in app.url_map.iter_rules()])
-
+    return '<br>'.join(f"{rule.endpoint} -> {rule.rule}" for rule in current_app.url_map.iter_rules())
