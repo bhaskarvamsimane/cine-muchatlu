@@ -1,41 +1,19 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import CSRFProtect
 
 db = SQLAlchemy()
-csrf = CSRFProtect()
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import CSRFProtect
-
-db = SQLAlchemy()
-csrf = CSRFProtect()
 
 def create_app():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Load config from instance/config.py
-    app.config.from_pyfile('config.py')
-
-    # Initialize extensions
     db.init_app(app)
-    csrf.init_app(app)
 
-    # Import and register blueprint
     from app.routes import main
     app.register_blueprint(main)
 
-    return app
-
-
-def create_app():
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_pyfile('config.py')
-
-    db.init_app(app)
-    csrf.init_app(app)
-
-    from app import routes
-    app.register_blueprint(routes.main)
+    with app.app_context():
+        db.create_all()  # <-- This will create all tables based on your models
 
     return app
