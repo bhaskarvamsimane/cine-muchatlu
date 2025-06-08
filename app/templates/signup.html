@@ -1,20 +1,30 @@
 {% extends 'layout.html' %}
 {% block content %}
-<h2>Sign Up</h2>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.username.label }}<br>
-        {{ form.username(size=30) }}
-    </p>
-    <p>
-        {{ form.password.label }}<br>
-        {{ form.password(size=30) }}
-    </p>
-    <p>
-        {{ form.confirm_password.label }}<br>
-        {{ form.confirm_password(size=30) }}
-    </p>
-    <p>{{ form.submit() }}</p>
-</form>
+
+<div class="card bg-dark text-white p-4 shadow-lg mx-auto" style="max-width: 500px;">
+    <h2 class="mb-4 text-center">Sign Up</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control", placeholder="Enter username") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", placeholder="Enter password") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.confirm_password.label(class="form-label") }}
+            {{ form.confirm_password(class="form-control", placeholder="Confirm password") }}
+        </div>
+
+        <div class="d-grid">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+
 {% endblock %}
