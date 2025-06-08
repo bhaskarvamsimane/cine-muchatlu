@@ -15,11 +15,11 @@ def create_app():
     db.init_app(app)
 
     # Register Blueprints
-    from app.routes import main
-    app.register_blueprint(main)
+from app.routes import main
+app.register_blueprint(main)
 
-    # Create tables
-    with app.app_context():
-        db.create_all()
+# Create tables
+with app.app_context():
+    db.create_all()
 
     return app
