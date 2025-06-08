@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2>Latest Movie Posts</h2>
+{% for post in posts %}
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
+        <h3><a href="{{ url_for('main.post', post_id=post.id) }}">{{ post.title }}</a></h3>
+        <p>{{ post.content[:150] }}...</p>
+        <small>Posted on {{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+    </div>
+{% else %}
+    <p>No posts yet. Stay tuned!</p>
+{% endfor %}
+{% endblock %}
