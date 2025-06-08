@@ -26,14 +26,18 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 @main.route('/signup', methods=['GET', 'POST'])
 def signup():
-    form = SignUpForm()
+    form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data)
-        user = User(username=form.username.data, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
-        flash('Account created! You can now log in.', 'success')
-        return redirect(url_for('login'))
+        hashed_pw = generate_password_hash(form.password.data)
+        new_user = User(username=form.username.data, password=hashed_pw)
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Account created successfully!', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Error creating account: ' + str(e), 'danger')
     return render_template('signup.html', form=form)
 
 
