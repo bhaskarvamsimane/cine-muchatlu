@@ -69,7 +69,8 @@ def dashboard():
 
 @main.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    return "<h1>Welcome to Dashboard</h1>"
+
 
 
 
