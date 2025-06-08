@@ -24,10 +24,10 @@ def create():
     return render_template('create_post.html')
     if 'image' in request.files:
         image_file = request.files['image']
-    if image_file and image_file.filename != '':
-        filename = secure_filename(image_file.filename)
-        image_file.save(os.path.join(app.root_path, 'static/uploads', filename))
-        new_post.image = filename
+        if image_file and image_file.filename != '':
+            filename = secure_filename(image_file.filename)
+            image_file.save(os.path.join(app.root_path, 'static/uploads', filename))
+            new_post.image = filename
 
 
 
