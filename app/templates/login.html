@@ -45,6 +45,13 @@
                     {{ form.submit(class="btn btn-primary fw-bold") }}
                 </div>
             </form>
+            <form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.username.label }} {{ form.username(class="form-control") }}
+    {{ form.password.label }} {{ form.password(class="form-control") }}
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+
         </div>
     </div>
 </div>
