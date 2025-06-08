@@ -68,8 +68,8 @@ def dashboard():
     return render_template('admin_dashboard.html', posts=posts)
 
 @main.route('/dashboard')
-def dashboard():
-    return "<h1>Welcome to Dashboard</h1>"
+def dashboard_alt():
+    return render_template('dashboard_alt.html')
 
 
 
