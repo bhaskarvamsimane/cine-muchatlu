@@ -2,6 +2,7 @@ from flask import (
     Blueprint, render_template, redirect, url_for, flash, 
     request, session, current_app
 )
+from flask_login import login_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 import os
@@ -45,15 +46,26 @@ def allowed_file(filename):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user and check_password_hash(user.password, form.password.data):
-            login_user(user)
-            flash('Login successful!', 'success')
-            return redirect(url_for('home'))  # or your homepage
-        else:
-            flash('Incorrect username or password', 'danger')
-    return render_template('login.html', form=form)
+        try:
+            user = User.query.filter_by(username=form.username.data).first()
+            if user:
+                print("✅ User found:", user.username)
+                print("🔐 Hashed password in DB:", user.password)
+                print("🔑 Password entered:", form.password.data)
 
+                if check_password_hash(user.password, form.password.data):
+                    login_user(user)
+                    flash('Login successful!', 'success')
+                    return redirect(url_for('home'))  # or your homepage
+                else:
+                    flash('Incorrect password.', 'danger')
+            else:
+                flash('User not found.', 'danger')
+        except Exception as e:
+            print("🔥 Exception during login:", e)
+            flash('Internal server error occurred.', 'danger')
+    return render_template('login.html', form=form)
+    
 @main.route('/logout')
 def logout():
     session.pop('admin', None)
