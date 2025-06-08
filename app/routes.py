@@ -126,3 +126,8 @@ def delete_post(post_id):
     db.session.commit()
     flash('Post deleted!')
     return redirect(url_for('main.dashboard'))
+
+@app.route('/routes')
+def show_routes():
+    return '<br>'.join([f"{rule.endpoint} -> {rule.rule}" for rule in app.url_map.iter_rules()])
+
