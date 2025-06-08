@@ -7,3 +7,10 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
     image = db.Column(db.String(100), nullable=True, default='default.jpg')  # Add this line
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)
