@@ -1,16 +1,30 @@
 {% extends 'layout.html' %}
 {% block content %}
-<h2>Admin Login</h2>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.username.label }}<br>
-        {{ form.username(size=30) }}
-    </p>
-    <p>
-        {{ form.password.label }}<br>
-        {{ form.password(size=30) }}
-    </p>
-    <p>{{ form.submit() }}</p>
-</form>
+
+<div class="container mt-5" style="max-width: 400px;">
+    <div class="card shadow-lg border-0">
+        <div class="card-body bg-dark text-white rounded">
+            <h3 class="text-center mb-4 text-warning">🔐 Admin Login</h3>
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control", placeholder="Enter username") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control", placeholder="Enter password") }}
+                </div>
+
+                <div class="d-grid mt-4">
+                    {{ form.submit(class="btn btn-primary fw-bold") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
