@@ -12,6 +12,7 @@ from app.models import User
 from app.models import Post
 from app import db
 from werkzeug.security import generate_password_hash
+from app.forms import SignUpForm  # adjust path based on your project structure
 
 
 main = Blueprint('main', __name__)
