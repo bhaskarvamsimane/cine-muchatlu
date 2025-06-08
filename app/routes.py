@@ -23,16 +23,16 @@ ADMIN_PASSWORD = 'password'
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-@main.route('/signup', methods=['GET', 'POST'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = SignUpForm()
     if form.validate_on_submit():
-        hashed_pw = generate_password_hash(form.password.data)
-        user = User(username=form.username.data, password=hashed_pw)
+        hashed_password = generate_password_hash(form.password.data)
+        user = User(username=form.username.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        flash('Account created! Please login.', 'success')
-        return redirect(url_for('main.login'))
+        flash('Account created! You can now log in.', 'success')
+        return redirect(url_for('login'))
     return render_template('signup.html', form=form)
 
 
@@ -41,16 +41,17 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@main.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and check_password_hash(user.password, form.password.data):
+            login_user(user)
             flash('Login successful!', 'success')
-            return redirect(url_for('main.dashboard'))  # Make sure this route exists
+            return redirect(url_for('home'))  # or your homepage
         else:
-            flash('Invalid username or password', 'danger')
+            flash('Incorrect username or password', 'danger')
     return render_template('login.html', form=form)
 
 @main.route('/logout')
