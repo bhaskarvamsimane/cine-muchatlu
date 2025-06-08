@@ -9,6 +9,11 @@ main = Blueprint('main', __name__)
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'password'
 
+@main.route('/signup')
+def signup():
+    return render_template('signup.html')
+
+
 @main.route('/')
 def home():
     posts = Post.query.order_by(Post.date_posted.desc()).all()
