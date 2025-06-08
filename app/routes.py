@@ -11,6 +11,8 @@ from app.forms import PostForm, LoginForm
 from app.models import User
 from app.models import Post
 from app import db
+from werkzeug.security import generate_password_hash
+
 
 main = Blueprint('main', __name__)
 
@@ -22,7 +24,15 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 @main.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    form = SignUpForm()
+    if form.validate_on_submit():
+        hashed_pw = generate_password_hash(form.password.data)
+        user = User(username=form.username.data, password=hashed_pw)
+        db.session.add(user)
+        db.session.commit()
+        flash('Account created! Please login.', 'success')
+        return redirect(url_for('main.login'))
+    return render_template('signup.html', form=form)
 
 
 
