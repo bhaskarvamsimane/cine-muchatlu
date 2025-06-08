@@ -18,6 +18,11 @@ ADMIN_PASSWORD = 'password'
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+@main.route('/signup', methods=['GET', 'POST'])
+def signup():
+    return render_template('signup.html')
+
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
