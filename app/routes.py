@@ -55,7 +55,7 @@ def signup():
 @main.route('/')
 def home():
     posts = Post.query.order_by(Post.date_posted.desc()).all()
-    return render_template('index.html', posts=posts)
+    return render_template('home.html', posts=posts)
 
 
 @main.route('/post/<int:post_id>')
