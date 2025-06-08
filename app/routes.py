@@ -9,6 +9,15 @@ main = Blueprint('main', __name__)
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'password'
 
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if not session.get('admin'):
+        return redirect(url_for('main.login'))
+
+    posts = Post.query.order_by(Post.date_posted.desc()).all()
+    return render_template('admin_dashboard.html', posts=posts)
+
+
 @main.route('/signup')
 def signup():
     return render_template('signup.html')
