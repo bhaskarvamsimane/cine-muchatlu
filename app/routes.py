@@ -57,6 +57,11 @@ def dashboard():
     posts = Post.query.order_by(Post.date_posted.desc()).all()
     return render_template('admin_dashboard.html', posts=posts)
 
+@main.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+
 
 @main.route('/admin/create', methods=['GET', 'POST'])
 def create_post():
