@@ -8,7 +8,8 @@ import os
 import time
 
 from app.forms import PostForm, LoginForm
-from app.models import Post, User
+from app.models import User
+from app.models import Post
 from app import db
 
 main = Blueprint('main', __name__)
@@ -31,21 +32,15 @@ def allowed_file(filename):
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        user = User.query.filter_by(email=email).first()
-        if user and check_password_hash(user.password, password):
-            # login_user(user)  # If using flask_login
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and check_password_hash(user.password, form.password.data):
             flash('Login successful!', 'success')
-            return redirect(url_for('main.home'))  # or your dashboard route
+            return redirect(url_for('main.dashboard'))  # Make sure this route exists
         else:
-            flash('Invalid credentials', 'danger')
-            return render_template('login.html')
-
-    return render_template('login.html')
-
+            flash('Invalid username or password', 'danger')
+    return render_template('login.html', form=form)
 
 @main.route('/logout')
 def logout():
